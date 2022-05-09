@@ -1,13 +1,10 @@
 package me.albert.amazingbot.events;
 
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import net.md_5.bungee.api.plugin.Event;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ABEvent extends Event {
-    private static final HandlerList handlers = new HandlerList();
-
     private final transient ConcurrentHashMap<String, Object> metas = new ConcurrentHashMap<>();
 
     protected long time;
@@ -15,14 +12,6 @@ public class ABEvent extends Event {
     protected long self_id;
 
     protected String post_type;
-
-    public ABEvent() {
-        super(true);
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
 
     public ConcurrentHashMap<String, Object> getMetas() {
         return metas;
@@ -39,11 +28,6 @@ public class ABEvent extends Event {
 
     public boolean hasMeta(String key) {
         return metas.containsKey(key);
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
     }
 
     public String getPostType() {

@@ -1,34 +1,38 @@
 package me.albert.amazingbot;
 
 import me.albert.amazingbot.bot.Bot;
-import me.albert.amazingbot.database.MySQL;
-import me.albert.amazingbot.listeners.NewPlayer;
-import me.albert.amazingbot.listeners.OnBind;
-import me.albert.amazingbot.listeners.OnCommand;
-import me.albert.amazingbot.utils.CustomConfig;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
 
-public class AmazingBot extends JavaPlugin {
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+
+public class AmazingBot extends Plugin {
+
+    private static ProxyServer proxyServer;
+
+    public static ProxyServer getProxyServer() {
+        return proxyServer;
+    }
 
     private static AmazingBot instance;
-    private static CustomConfig data;
-    private static CustomConfig mysqlSettings;
 
     public static AmazingBot getInstance() {
         return instance;
     }
 
-    public static CustomConfig getData() {
-        return data;
+    private Configuration configuration;
+
+    public Configuration getConfig() {
+        return configuration;
     }
 
-    public static CustomConfig getMysqlSettings() {
-        return mysqlSettings;
-    }
+    private boolean enable = false;
 
     public static boolean getDebug() {
         return instance.getConfig().getBoolean("debug");
@@ -36,41 +40,43 @@ public class AmazingBot extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        enable = true;
+        proxyServer = getProxy();
         instance = this;
-        saveDefaultConfig();
+        loadConfig();
         Bot.start();
-        registerEvent(new OnCommand());
-        registerEvent(new NewPlayer());
-        registerEvent(new OnBind());
-        data = new CustomConfig("data.yml", this);
-        mysqlSettings = new CustomConfig("mysql.yml", this);
-        if (mysqlSettings.getConfig().getBoolean("enable")) {
-            MySQL.setUP();
-        }
-        getLogger().info("Loaded");
-    }
-
-    private void registerEvent(Listener listener) {
-        Bukkit.getServer().getPluginManager().registerEvents(listener, this);
+        getLogger().info("AmazingBot - 4.0.10bungee魔改版 已启动 作者 -> 小白");
     }
 
     @Override
     public void onDisable() {
-        if (MySQL.ENABLED) {
-            MySQL.close();
-            return;
-        }
-        data.save();
+        enable = false;
         Bot.stop();
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        reloadConfig();
-        data.reload();
-        Bot.stop();
-        Bot.start();
-        sender.sendMessage("§a所有配置文件已经重新载入!");
-        return true;
+    public boolean isEnabled() {
+        return enable;
     }
+
+    private void loadConfig() {
+        if (!getDataFolder().exists()) {
+            if (getDataFolder().mkdir()) {
+                getLogger().info("创建插件配置文件夹");
+            }
+        }
+        File file = new File(getDataFolder(), "config.yml");
+        if (!file.exists()) {
+            try (InputStream in = getResourceAsStream("config.yml")) {
+                Files.copy(in, file.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

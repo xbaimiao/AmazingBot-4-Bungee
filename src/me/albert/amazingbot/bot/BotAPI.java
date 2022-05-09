@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.albert.amazingbot.AmazingBot;
-import me.albert.amazingbot.database.MySQL;
 import me.albert.amazingbot.objects.ApiAction;
 import me.albert.amazingbot.objects.contact.*;
 import me.albert.amazingbot.objects.info.*;
@@ -19,7 +18,6 @@ import me.albert.amazingbot.objects.message.EssenceMessage;
 import me.albert.amazingbot.objects.message.ForwardMessage;
 import me.albert.amazingbot.objects.message.Image;
 import me.albert.amazingbot.objects.message.Message;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -577,67 +575,5 @@ public class BotAPI {
         }
         return false;
     }
-
-
-    public void setBind(Long userID, UUID uuid) {
-        if (MySQL.ENABLED) {
-            MySQL.savePlayer(userID, uuid.toString());
-            return;
-        }
-        FileConfiguration data = AmazingBot.getData().getConfig();
-        data.set(String.valueOf(userID), uuid.toString());
-        AmazingBot.getData().save();
-    }
-
-    public UUID getPlayer(Long userID) {
-        if (MySQL.ENABLED) {
-            return MySQL.getPlayer(userID);
-        }
-        UUID uuid = null;
-        FileConfiguration data = AmazingBot.getData().getConfig();
-        if (data.getString(String.valueOf(userID)) != null) {
-            uuid = UUID.fromString(data.getString(String.valueOf(userID)));
-        }
-        return uuid;
-    }
-
-    public void removePlayer(UUID playerID) {
-        if (MySQL.ENABLED) {
-            MySQL.removePlayer(playerID.toString());
-            return;
-        }
-        Long userID = null;
-        FileConfiguration data = AmazingBot.getData().getConfig();
-        for (String key : data.getConfigurationSection("").getKeys(false)) {
-            if (data.getString(key).equalsIgnoreCase(playerID.toString())) {
-                userID = Long.parseLong(key);
-            }
-        }
-        data.set(String.valueOf(userID), null);
-    }
-
-    public void removePlayer(Long userID) {
-        if (MySQL.ENABLED) {
-            MySQL.removePlayer(userID);
-            return;
-        }
-        FileConfiguration data = AmazingBot.getData().getConfig();
-        data.set(String.valueOf(userID), null);
-    }
-
-    public Long getUser(UUID playerID) {
-        if (MySQL.ENABLED) {
-            return MySQL.getQQ(playerID.toString());
-        }
-        Long userID = null;
-        FileConfiguration data = AmazingBot.getData().getConfig();
-        for (String key : data.getConfigurationSection("").getKeys(false)) {
-            if (data.getString(key).equalsIgnoreCase(playerID.toString())) {
-                return Long.parseLong(key);
-            }
-        }
-        return userID;
-    }
-
 
 }

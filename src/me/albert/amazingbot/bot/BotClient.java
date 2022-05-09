@@ -8,8 +8,7 @@ import me.albert.amazingbot.events.locale.WebSocketConnectedEvent;
 import me.albert.amazingbot.events.locale.WebSocketPostSendEvent;
 import me.albert.amazingbot.events.locale.WebSocketPreSendEvent;
 import me.albert.amazingbot.events.locale.WebSocketReceiveEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
+import net.md_5.bungee.api.plugin.Event;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -40,7 +39,7 @@ public class BotClient extends WebSocketClient {
     }
 
     private static void callEvent(Event event) {
-        Bukkit.getPluginManager().callEvent(event);
+        AmazingBot.getProxyServer().getPluginManager().callEvent(event);
     }
 
     public static void main(String[] args) throws URISyntaxException {
@@ -103,7 +102,7 @@ public class BotClient extends WebSocketClient {
             return;
         }
         recTask.incrementAndGet();
-        Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
+        AmazingBot.getProxyServer().getScheduler().runAsync(instance, () -> {
             try {
                 processMessageRec(msg);
             } catch (Exception e) {
@@ -142,7 +141,7 @@ public class BotClient extends WebSocketClient {
 
 
     @Override
-    public void onOpen(ServerHandshake handshakedata) {
+    public void onOpen(ServerHandshake handshake) {
         if (Bot.getClient() != this) {
             this.close();
         }
@@ -157,12 +156,12 @@ public class BotClient extends WebSocketClient {
         int delay = instance.getConfig().getInt("main.auto_reconnect");
         if (instance.isEnabled() && code != 1000) {
             AmazingBot.getInstance().getLogger().info("§a将在" + delay + "秒后再次尝试连接");
-            taskID = Bukkit.getScheduler().runTaskLater(instance, () -> {
+            taskID = AmazingBot.getProxyServer().getScheduler().schedule(instance, () -> {
                 if (Bot.getClient() != this) {
                     return;
                 }
                 reconnect();
-            }, 20L * delay).getTaskId();
+            }, delay, TimeUnit.SECONDS).getId();
         }
     }
 

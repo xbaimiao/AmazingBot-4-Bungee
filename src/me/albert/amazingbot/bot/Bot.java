@@ -1,8 +1,7 @@
 package me.albert.amazingbot.bot;
 
 import me.albert.amazingbot.AmazingBot;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
+import net.md_5.bungee.config.Configuration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,10 +14,9 @@ public class Bot {
 
     private static BotClient client;
 
-
     public static void start() {
         try {
-            FileConfiguration config = AmazingBot.getInstance().getConfig();
+            Configuration config = AmazingBot.getInstance().getConfig();
             URI uri = new URI(config.getString("main.URI"));
             String token = config.getString("main.token");
             Map<String, String> httpHeaders = new HashMap<>();
@@ -32,10 +30,9 @@ public class Bot {
     }
 
     public static void stop() {
-        Bukkit.getScheduler().cancelTask(client.taskID);
+        AmazingBot.getProxyServer().getScheduler().cancel(client.taskID);
         client.close();
     }
-
 
     public static BotAPI getApi() {
         return api;
@@ -52,6 +49,5 @@ public class Bot {
     public static Boolean getConnected() {
         return !client.isClosed();
     }
-
 
 }
